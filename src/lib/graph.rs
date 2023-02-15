@@ -254,6 +254,17 @@ where
     }
 }
 
+pub fn shortest_path_length<T, G>(g: &Graph<T, G>, source: T, target: T) -> Option<usize>
+where
+    T: Clone + Hash + Eq + Debug,
+    G: GraphType,
+{
+    match bfs_util(g, source, target) {
+        Some((len, _)) => Some(len),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
