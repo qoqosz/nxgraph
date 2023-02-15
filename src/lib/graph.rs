@@ -242,16 +242,8 @@ where
     T: Clone + Hash + Eq + Debug,
     G: GraphType,
 {
-    match bfs_util(g, source.clone(), target.clone()) {
-        Some((_, mut previous)) => {
-            let path = build_path::<T>(&mut previous, source, target);
-            match path.len() {
-                0 => None,
-                _ => Some(path.clone()),
-            }
-        }
-        _ => None,
-    }
+    bfs_util(g, source.clone(), target.clone())
+        .map(|(_, mut previous)| build_path::<T>(&mut previous, source, target))
 }
 
 pub fn shortest_path_length<T, G>(g: &Graph<T, G>, source: T, target: T) -> Option<usize>
@@ -259,10 +251,7 @@ where
     T: Clone + Hash + Eq + Debug,
     G: GraphType,
 {
-    match bfs_util(g, source, target) {
-        Some((len, _)) => Some(len),
-        _ => None,
-    }
+    bfs_util(g, source, target).map(|(len, _)| len)
 }
 
 #[cfg(test)]
