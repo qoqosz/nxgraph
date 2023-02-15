@@ -16,7 +16,6 @@ fn main() {
     g.add_edges_from(vec![(1, 2), (1, 4), (2, 3), (3, 5), (4, 3)]);
     g.add_node(6);
 
-    println!("graph={:?}", g);
     println!("nodes={:?}", g.nodes::<HashSet<_>>());
     println!("edges={:?}", g.edges::<HashSet<(_, _)>>());
     println!("topological sort={:?}", topological_sort(&g));
