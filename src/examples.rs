@@ -1,4 +1,4 @@
-use nxgraph::graph::*;
+use nxgraph::{topological_sort, DiGraph};
 use std::collections::HashSet;
 
 fn main() {
@@ -9,4 +9,5 @@ fn main() {
     println!("graph={:?}", g);
     println!("nodes={:?}", g.nodes::<HashSet<_>>());
     println!("edges={:?}", g.edges::<HashSet<(_, _)>>());
+    println!("topological sort={:?}", topological_sort(&g));
 }
