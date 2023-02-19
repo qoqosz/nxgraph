@@ -83,6 +83,6 @@ mod tests {
             vec![1, 7, 5, 2, 3, 4, 6],
             vec![7, 1, 5, 2, 3, 4, 6],
         ];
-        assert!((actual == expected[0]) || (actual == expected[1]));
+        assert!(expected.contains(&actual));
     }
 }
