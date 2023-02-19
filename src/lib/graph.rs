@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
@@ -150,108 +150,6 @@ where
             .map(|n| (n.clone(), self.in_degree(n)))
             .collect::<HashMap<T, usize>>()
     }
-}
-
-pub fn topological_generations<T>(g: &Graph<T, Directed>) -> Vec<Vec<T>>
-where
-    T: Clone + Hash + Eq + Debug,
-{
-    let mut generations: Vec<Vec<T>> = Vec::new();
-    let mut indegree_map: HashMap<T, usize> = HashMap::new();
-    let mut zero_indegree: Vec<T> = Vec::new();
-
-    for (k, v) in g.in_degree_map().iter() {
-        match v {
-            0 => zero_indegree.push(k.clone()),
-            _ => {
-                indegree_map.insert(k.clone(), v.clone());
-            }
-        };
-    }
-
-    while !zero_indegree.is_empty() {
-        let this_generation = zero_indegree.clone();
-        zero_indegree = vec![];
-
-        for node in this_generation.iter() {
-            for child in g.adj(node).expect("Node does not exist") {
-                indegree_map.entry(child.clone()).and_modify(|n| *n -= 1);
-                if *indegree_map.get(&child).unwrap() == 0 {
-                    zero_indegree.push(child.clone());
-                    indegree_map.remove(child);
-                }
-            }
-        }
-        generations.push(this_generation);
-    }
-    generations
-}
-
-pub fn topological_sort<T>(g: &Graph<T, Directed>) -> Vec<T>
-where
-    T: Clone + Hash + Eq + Debug,
-{
-    topological_generations(g).into_iter().flatten().collect()
-}
-
-fn bfs_util<T, G>(g: &Graph<T, G>, source: T, target: T) -> Option<(usize, HashMap<T, T>)>
-where
-    T: Clone + Hash + Eq + Debug,
-    G: GraphType,
-{
-    let mut previous: HashMap<T, T> = HashMap::new();
-    let mut visited: HashSet<T> = HashSet::from_iter(vec![source.clone()]);
-    let mut queue: VecDeque<(T, usize)> = VecDeque::from_iter(vec![(source.clone(), 0)]);
-
-    while queue.len() > 0 {
-        let node: T;
-        let dist: usize;
-        (node, dist) = queue.pop_front().expect("Empty queue");
-
-        if node == target {
-            return Some((dist, previous));
-        }
-
-        for neighbor in g.adj(&node).expect("Node does not exist") {
-            if !visited.contains(neighbor) {
-                previous.insert(neighbor.clone(), node.clone());
-                queue.push_back((neighbor.clone(), dist + 1));
-                visited.insert(neighbor.clone());
-            }
-        }
-    }
-    None
-}
-
-fn build_path<T>(previous: &mut HashMap<T, T>, source: T, target: T) -> Vec<T>
-where
-    T: Clone + Hash + Eq + Debug,
-{
-    let mut path: Vec<T> = vec![target.clone()];
-    let mut current: T = target;
-
-    while current != source {
-        current = previous.remove(&current).expect("No entry");
-        path.push(current.clone());
-    }
-    path.into_iter().rev().collect()
-}
-
-pub fn shortest_path<T, G>(g: &Graph<T, G>, source: T, target: T) -> Option<Vec<T>>
-where
-    T: Clone + Hash + Eq + Debug,
-    G: GraphType,
-{
-    bfs_util(g, source.clone(), target.clone())
-        .map(|(_, mut previous)| build_path::<T>(&mut previous, source, target))
-}
-
-pub fn shortest_path_length<T, G>(g: &Graph<T, G>, source: T, target: T) -> Option<usize>
-where
-    T: Clone + Hash + Eq + Debug,
-    G: GraphType,
-{
-    bfs_util(g, source, target).map(|(len, _)| len)
 }
 
 #[cfg(test)]

@@ -11,12 +11,15 @@ fn undirected_graph() {
     println!("edges={:?}", g.edges::<HashSet<(_, _)>>());
     println!(
         "shortest path from 1 to 5={:?}",
-        shortest_path(&g, 1, 5).unwrap()
+        BFS::shortest_path(&g, 1, 5).unwrap()
     );
-    println!("shortest path from 1 to 6={:?}", shortest_path(&g, 1, 6));
+    println!(
+        "shortest path from 1 to 6={:?}",
+        BFS::shortest_path(&g, 1, 6)
+    );
     println!(
         "shortest path length from 1 to 5={:?}",
-        shortest_path_length(&g, 1, 5).unwrap()
+        BFS::shortest_path_length(&g, 1, 5).unwrap()
     );
 }
 
@@ -32,11 +35,15 @@ fn directed_graph() {
     println!("topological sort={:?}", topological_sort(&g));
     println!(
         "shortest path from 1 to 5={:?}",
-        shortest_path(&g, 1, 5).unwrap()
+        BFS::shortest_path(&g, 1, 5).unwrap()
     );
     println!(
         "shortest path length from 1 to 5={:?}",
-        shortest_path_length(&g, 1, 5).unwrap()
+        BFS::shortest_path_length(&g, 1, 5).unwrap()
+    );
+    print!(
+        "shortest path Dijkstra's algo from 1 to 5={:?}",
+        Dijkstra::shortest_path(&g, 1, 5).unwrap()
     );
 }
 
@@ -48,4 +55,6 @@ fn main() {
     println!("\n\nDirected graph");
     println!("==============");
     directed_graph();
+
+    println!("");
 }

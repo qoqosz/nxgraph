@@ -3,8 +3,8 @@ Simple Rust graph library inspired by NetworkX's API.
 
 ## Simple directed graph
 ```
-1 - 2 - 3 - 5      6
- '--- 4 ---'
+1 -> 2 -> 3 -> 5      6
+ '---> 4 ------^
 ```
 Snippet from `examples.rs` demonstrating how to construct a graph and access its basic properties:
 ```rust
