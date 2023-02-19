@@ -1,4 +1,4 @@
-name: test
+name: gh
 
 on:
   push:
@@ -10,7 +10,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test:
+    name: Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -20,20 +21,35 @@ jobs:
     - name: Run tests
       run: cargo test --verbose
 
-  rustdoc:
+  doc:
+    name: Documentation
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
-    - name: Build documentation
-      run: cargo doc --all --no-deps
+      - name: Build documentation
+        uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --verbose --no-deps --all-features
 
-    - name: Publish documentation
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_branch: gh-pages
-        publish_dir: ./target/doc
-        force_orphan: true
+      - name: Finalize documentation
+        run: |
+          CRATE_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]' | cut -f2 -d"/")
+          echo "<meta http-equiv=\"refresh\" content=\"0; url=${CRATE_NAME/-/_}\">" > target/doc/index.html
+          touch target/doc/.nojekyll
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: Documentation
+          path: target/doc
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.GH_PAT }}
+          BRANCH: gh-pages
+          FOLDER: target/doc
