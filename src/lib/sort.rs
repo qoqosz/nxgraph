@@ -77,7 +77,12 @@ mod tests {
     fn test_topological_sort() {
         let g = simple_graph();
         let actual = topological_sort(&g);
-        let expected = vec![vec![1, 7, 2, 5, 3, 4, 6], vec![7, 1, 2, 5, 3, 4, 6]];
+        let expected = vec![
+            vec![1, 7, 2, 5, 3, 4, 6],
+            vec![7, 1, 2, 5, 3, 4, 6],
+            vec![1, 7, 5, 2, 3, 4, 6],
+            vec![7, 1, 5, 2, 3, 4, 6],
+        ];
         assert!((actual == expected[0]) || (actual == expected[1]));
     }
 }
