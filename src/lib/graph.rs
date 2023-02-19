@@ -1,19 +1,24 @@
+//! Definition of graphs.
 use std::collections::{HashMap, HashSet};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::marker::PhantomData;
 
+/// An undirected graph type.
 #[derive(Debug)]
 pub struct Undirected {}
 
+/// A directed graph type.
 #[derive(Debug)]
 pub struct Directed {}
 
+/// A graph type.
 pub trait GraphType {}
 
 impl GraphType for Undirected {}
 impl GraphType for Directed {}
 
+/// A graph object.
 #[derive(Debug)]
 pub struct Graph<T, G = Undirected>
 where
@@ -25,6 +30,7 @@ where
     typ: PhantomData<G>,
 }
 
+/// An alias for a directed graph.
 pub type DiGraph<T> = Graph<T, Directed>;
 
 impl<T, G> Default for Graph<T, G>

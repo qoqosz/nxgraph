@@ -1,3 +1,4 @@
+//! Graph sorting utilities.
 use crate::graph::{Directed, Graph};
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -43,4 +44,40 @@ where
     T: Clone + Hash + Eq + Debug,
 {
     topological_generations(g).into_iter().flatten().collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::topological_generations;
+
+    use super::*;
+
+    fn simple_graph() -> Graph<i8, Directed> {
+        let mut g: Graph<i8, Directed> = Graph::new();
+        g.add_edges_from(vec![(1, 2), (2, 3), (3, 4), (1, 5), (5, 4), (4, 6)]);
+        g.add_node(7);
+        g
+    }
+
+    #[test]
+    fn test_topological_generations() {
+        let g = simple_graph();
+        let actual = topological_generations(&g)
+            .into_iter()
+            .map(|mut gen| {
+                gen.sort();
+                gen
+            })
+            .collect::<Vec<Vec<i8>>>();
+        let expected = vec![vec![1, 7], vec![2, 5], vec![3], vec![4], vec![6]];
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn test_topological_sort() {
+        let g = simple_graph();
+        let actual = topological_sort(&g);
+        let expected = vec![vec![1, 7, 2, 5, 3, 4, 6], vec![7, 1, 2, 5, 3, 4, 6]];
+        assert!(expected.contains(&actual));
+    }
 }
