@@ -1,10 +1,24 @@
 //! Graph sorting utilities.
 use crate::graph::{Directed, Graph};
 use std::collections::HashMap;
-use std::fmt::Debug;
+use std::fmt;
+use std::fmt::{Debug, Display};
 use std::hash::Hash;
 
-pub fn topological_generations<T>(g: &Graph<T, Directed>) -> Vec<Vec<T>>
+#[derive(Debug, Clone)]
+pub struct CycleError;
+
+impl std::error::Error for CycleError {}
+
+impl Display for CycleError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "A cycle has been detected in a graph")
+    }
+}
+
+type Result<T> = std::result::Result<T, CycleError>;
+
+pub fn topological_generations<T>(g: &Graph<T, Directed>) -> Result<Vec<Vec<T>>>
 where
     T: Clone + Hash + Eq + Debug,
 {
@@ -36,14 +50,25 @@ where
         }
         generations.push(this_generation);
     }
-    generations
+
+    if !indegree_map.is_empty() {
+        return Err(CycleError);
+    }
+
+    Ok(generations)
 }
 
-pub fn topological_sort<T>(g: &Graph<T, Directed>) -> Vec<T>
+pub fn topological_sort<T>(g: &Graph<T, Directed>) -> Result<Vec<T>>
 where
     T: Clone + Hash + Eq + Debug,
 {
-    topological_generations(g).into_iter().flatten().collect()
+    match topological_generations(g) {
+        Ok(gens) => {
+            let sorted = gens.into_iter().flatten().collect();
+            Ok(sorted)
+        }
+        Err(e) => Err(e),
+    }
 }
 
 #[cfg(test)]
@@ -63,6 +88,8 @@ mod tests {
     fn test_topological_generations() {
         let g = simple_graph();
         let actual = topological_generations(&g)
+            .ok()
+            .unwrap()
             .into_iter()
             .map(|mut gen| {
                 gen.sort();
@@ -76,7 +103,7 @@ mod tests {
     #[test]
     fn test_topological_sort() {
         let g = simple_graph();
-        let actual = topological_sort(&g);
+        let actual = topological_sort(&g).ok().unwrap();
         let expected = vec![
             vec![1, 7, 2, 5, 3, 4, 6],
             vec![7, 1, 2, 5, 3, 4, 6],
@@ -84,5 +111,12 @@ mod tests {
             vec![7, 1, 5, 2, 3, 4, 6],
         ];
         assert!(expected.contains(&actual));
+    }
+
+    #[test]
+    fn cycle_error() {
+        let mut g: Graph<i8, Directed> = Graph::new();
+        g.add_edges_from(vec![(1, 2), (2, 3), (3, 1)]);
+        assert!(topological_sort(&g).is_err());
     }
 }
