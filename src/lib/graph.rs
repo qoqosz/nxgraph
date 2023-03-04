@@ -90,7 +90,7 @@ impl<T> Graph<T, Undirected>
 where
     T: Clone + Hash + Eq + Debug,
 {
-    pub fn is_directed() -> bool {
+    pub fn is_directed(&self) -> bool {
         false
     }
 
@@ -117,7 +117,7 @@ impl<T> Graph<T, Directed>
 where
     T: Clone + Hash + Eq + Debug,
 {
-    pub fn is_directed() -> bool {
+    pub fn is_directed(&self) -> bool {
         true
     }
 

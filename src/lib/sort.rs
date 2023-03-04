@@ -18,6 +18,23 @@ impl Display for CycleError {
 
 type Result<T> = std::result::Result<T, CycleError>;
 
+/// Checks if a directed graph has a cycle.
+pub fn has_cycle<T>(g: &Graph<T, Directed>) -> bool
+where
+    T: Clone + Hash + Eq + Debug,
+{
+    topological_generations(g).is_err()
+}
+
+/// Returns `true` if a graph is a directed acyclic graph (DAG) or `false` otherwise.
+pub fn is_directed_acyclic_graph<T>(g: &Graph<T, Directed>) -> bool
+where
+    T: Clone + Hash + Eq + Debug,
+{
+    g.is_directed() && !has_cycle(g)
+}
+
+/// Stratifies a DAG into generations.
 pub fn topological_generations<T>(g: &Graph<T, Directed>) -> Result<Vec<Vec<T>>>
 where
     T: Clone + Hash + Eq + Debug,
@@ -58,6 +75,7 @@ where
     Ok(generations)
 }
 
+/// Returns a vector of nodes in a topologically sorted order.
 pub fn topological_sort<T>(g: &Graph<T, Directed>) -> Result<Vec<T>>
 where
     T: Clone + Hash + Eq + Debug,
@@ -118,5 +136,31 @@ mod tests {
         let mut g: Graph<i8, Directed> = Graph::new();
         g.add_edges_from(vec![(1, 2), (2, 3), (3, 1)]);
         assert!(topological_sort(&g).is_err());
+    }
+
+    #[test]
+    fn detect_cycle() {
+        let mut g: Graph<i8, Directed> = Graph::new();
+        g.add_edges_from(vec![(1, 2), (2, 3), (3, 1)]);
+        assert!(has_cycle(&g));
+    }
+
+    #[test]
+    fn detect_no_cycle() {
+        let g = simple_graph();
+        assert!(!has_cycle(&g));
+    }
+
+    #[test]
+    fn detect_no_dag() {
+        let mut g: Graph<i8, Directed> = Graph::new();
+        g.add_edges_from(vec![(1, 2), (2, 3), (3, 1)]);
+        assert!(!is_directed_acyclic_graph(&g));
+    }
+
+    #[test]
+    fn detect_dag() {
+        let g = simple_graph();
+        assert!(is_directed_acyclic_graph(&g));
     }
 }
